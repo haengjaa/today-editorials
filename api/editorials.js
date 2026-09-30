@@ -156,10 +156,54 @@ async function fetchChosun() {
     }));
 }
 
+/* ───────── 한겨레: 사설 목록 페이지 안에 들어 있는 데이터(__NEXT_DATA__)를 읽습니다 ───────── */
+
+// 한겨레 페이지 속 데이터 묶음(JSON)을 꺼냅니다
+function nextData(html) {
+  const m = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/);
+  if (!m) throw new Error('한겨레 페이지에서 데이터를 찾지 못했습니다 (사이트 구조가 바뀌었을 수 있음)');
+  return JSON.parse(m[1]);
+}
+
+// 문장 끝(. ? !)이 실제로 있을 때만 첫 문장을 돌려줍니다. 없으면 빈 글자.
+function completeFirstSentence(text) {
+  const m = text.match(/^.*?[.?!](?=\s|$)/);
+  return m ? m[0] : '';
+}
+
+async function fetchHani() {
+  const data = nextData(await getText('https://www.hani.co.kr/arti/opinion/editorial'));
+  const list = (data.props?.pageProps?.listData?.articleList || [])
+    .filter(a => (a.url || '').includes('/opinion/editorial/'))
+    .sort((a, b) => String(b.createDate).localeCompare(String(a.createDate)))
+    .slice(0, HOW_MANY);
+
+  return Promise.all(list.map(async a => {
+    const url = 'https://www.hani.co.kr' + a.url;
+    // 목록의 본문 앞부분(약 120자, 끝이 "..."로 잘림)에서 먼저 첫 문장을 찾습니다
+    let summary = completeFirstSentence(clean(a.prologue || '').replace(/\s*\.\.\.\s*$/, ''));
+    // 첫 문장이 길어서 잘렸으면 기사 페이지 본문을 읽습니다
+    if (!summary) {
+      try {
+        const art = nextData(await getText(url)).props?.pageProps?.article;
+        summary = firstSentence(clean(String(art?.content || '').replace(/\[%%\w+%%\]/g, ' ')));
+      } catch { /* 본문을 못 읽어도 제목은 보여줍니다 */ }
+    }
+    return {
+      id: 'hani-' + a.id,
+      url,
+      title: stripTag(decode(a.title || '')),
+      date: String(a.createDate || '').slice(0, 10), // "2026-09-29 18:44" → "2026-09-29"
+      summary: summary || '본문을 불러오지 못했습니다.',
+    };
+  }));
+}
+
 /* ───────── 신문사 목록: 새 신문사는 여기에 한 줄씩 추가합니다 ───────── */
 
 const PAPERS = [
   { key: 'chosun', name: '조선일보', fetch: fetchChosun },
+  { key: 'hani', name: '한겨레', fetch: fetchHani },
   { key: 'mk', name: '매일경제', fetch: fetchMk },
   { key: 'hankyung', name: '한국경제', fetch: fetchHankyung },
 ];
