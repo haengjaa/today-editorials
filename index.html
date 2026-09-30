@@ -29,6 +29,7 @@ main{padding:14px 14px 92px}
 .summary{margin:0;color:#374151;font-size:11.5px;line-height:1.42}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
 .mk{background:#f59e0b}
+.hankyung{background:#7c3aed}
 .empty{padding:35px 10px;text-align:center;color:var(--muted);font-size:12px}
 .footer{position:fixed;left:0;right:0;bottom:0;z-index:15;text-align:center;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border-top:1px solid var(--line);font-size:10px;color:var(--muted)}
 @media(max-width:540px){.brand h1{font-size:19px}}
@@ -47,11 +48,8 @@ main{padding:14px 14px 92px}
   </header>
 
   <main>
-    <div class="notice">매일경제 사설 목록에서 <b>최신 사설 3개</b>를 가져옵니다. 요약은 본문의 첫 문장이며, 카드를 누르면 원문이 새 창으로 열립니다.</div>
-    <section>
-      <div class="section-title"><strong>매일경제</strong><span id="paperInfo">불러오는 중…</span></div>
-      <div id="list"><div class="empty">불러오는 중…</div></div>
-    </section>
+    <div class="notice">신문사별로 <b>최신 사설 3개</b>를 가져옵니다. 요약은 본문의 첫 문장이며, 카드를 누르면 원문이 새 창으로 열립니다.</div>
+    <div id="content"><div class="empty">불러오는 중…</div></div>
   </main>
 
   <div class="footer">기사 전문은 언론사 저작권을 위해 앱에 싣지 않고 원문으로 연결합니다.</div>
@@ -62,28 +60,34 @@ main{padding:14px 14px 92px}
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // 사설 하나를 카드 모양 HTML로 만듭니다
-function card(a) {
+function card(a, paper) {
   return `<a class="card" href="${esc(a.url)}" target="_blank" rel="noopener">
-    <div class="meta"><i class="dot mk"></i><b>매일경제</b><span>·</span><span>${esc(a.date)}</span></div>
+    <div class="meta"><i class="dot ${esc(paper.key)}"></i><b>${esc(paper.name)}</b><span>·</span><span>${esc(a.date)}</span></div>
     <h3>${esc(a.title)}</h3>
     <p class="summary">${esc(a.summary)}</p>
   </a>`;
 }
 
+// 신문사 하나의 묶음(제목 + 카드들)을 만듭니다
+function section(paper) {
+  const items = paper.items || [];
+  const info = paper.error ? '불러오기 실패' : `${items[0]?.date || '자료 없음'} · ${items.length}건`;
+  const body = items.length
+    ? items.map(a => card(a, paper)).join('')
+    : `<div class="empty">${paper.error ? '사설을 불러오지 못했습니다.<br>' + esc(paper.error) : '확인된 사설이 없습니다.'}</div>`;
+  return `<section><div class="section-title"><strong>${esc(paper.name)}</strong><span>${esc(info)}</span></div>${body}</section>`;
+}
+
 // 서버(/api/editorials)에서 사설을 받아와 화면에 그립니다
 async function load() {
-  const list = document.getElementById('list');
-  const info = document.getElementById('paperInfo');
+  const box = document.getElementById('content');
   try {
     const r = await fetch('/api/editorials?ts=' + Date.now(), { cache: 'no-store' });
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || '서버 오류');
-    const items = j.items || [];
-    info.textContent = `${items[0]?.date || '날짜 없음'} · ${items.length}건`;
-    list.innerHTML = items.length ? items.map(card).join('') : '<div class="empty">확인된 사설이 없습니다.</div>';
+    box.innerHTML = (j.papers || []).map(section).join('');
   } catch (e) {
-    info.textContent = '불러오기 실패';
-    list.innerHTML = `<div class="empty">사설을 불러오지 못했습니다.<br>${esc(e.message)}</div>`;
+    box.innerHTML = `<div class="empty">사설을 불러오지 못했습니다.<br>${esc(e.message)}</div>`;
   }
 }
 
