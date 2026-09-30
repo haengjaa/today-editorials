@@ -2,9 +2,11 @@
 // 주소: /api/editorials  (Vercel이 이 파일을 자동으로 서버 기능으로 실행합니다)
 
 const HOW_MANY = 3;
+// 일반 크롬 브라우저와 같은 모양으로 요청합니다 (보안 서비스가 로봇으로 오해하지 않도록)
 const HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (compatible; TodayEditorials/1.0)',
-  'Accept-Language': 'ko-KR,ko;q=0.9',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
 };
 
 /* ───────── 공통 도우미 함수 ───────── */
