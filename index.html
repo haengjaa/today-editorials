@@ -1,120 +1,315 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
-<!-- 휴대폰 홈 화면에 앱처럼 설치하기 위한 설정 -->
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" href="/icon-192.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="오늘의 사설">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>오늘의 사설</title>
-<style>
-:root{--bg:#f4f5f7;--card:#fff;--text:#121722;--muted:#697386;--line:#e5e7eb}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif}
-body{min-height:100vh}
-.app{max-width:760px;margin:auto;min-height:100vh}
-.top{position:sticky;top:0;z-index:20;padding:12px 14px 9px;background:rgba(244,245,247,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.brand{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.brand h1{font-size:20px;margin:0;letter-spacing:-.5px}
-.brand-right{display:flex;align-items:center;gap:7px}
-.date{font-size:11px;color:var(--muted)}
-.sync{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 9px;font-size:11px;font-weight:700;cursor:pointer}
-main{padding:14px 14px 92px}
-.notice{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin-bottom:13px;font-size:12px;color:var(--muted);line-height:1.55}
-.section-title{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 9px}
-.section-title strong{font-size:14px}
-.section-title span{font-size:11px;color:var(--muted)}
-.card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 11px;margin-bottom:7px;box-shadow:0 1px 5px #00000006;transition:transform .12s}
-.card:active{transform:scale(.994)}
-.card h3{font-size:14px;line-height:1.35;margin:5px 0 4px;letter-spacing:-.3px}
-.meta{display:flex;gap:5px;align-items:center;color:var(--muted);font-size:10px}
-.summary{margin:0;color:#374151;font-size:11.5px;line-height:1.42}
-.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
-.chosun{background:#1d4ed8}
-.hani{background:#16a34a}
-.mk{background:#f59e0b}
-.hankyung{background:#7c3aed}
-.empty{padding:35px 10px;text-align:center;color:var(--muted);font-size:12px}
-.footer{position:fixed;left:0;right:0;bottom:0;z-index:15;text-align:center;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border-top:1px solid var(--line);font-size:10px;color:var(--muted)}
-@media(max-width:540px){.brand h1{font-size:19px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#5b6aef">
+    <meta name="description" content="한국 주요 신문사의 사설을 모아서 보는 앱">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <title>오늘의 사설</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 헤더 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .by-credit {
+            font-size: 12px;
+            color: #999;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .date-time {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .update-btn {
+            background-color: #5b6aef;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .update-btn:hover {
+            background-color: #4a57d9;
+        }
+
+        /* 신문사 섹션 */
+        .newspaper-section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .section-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* 리스트 아이템 */
+        .editorial-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+
+        .editorial-item:last-child {
+            border-bottom: none;
+        }
+
+        .editorial-item:hover {
+            background-color: #fafafa;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .item-category {
+            display: inline-block;
+            background-color: #e8eaf6;
+            color: #5b6aef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .item-title:hover {
+            color: #5b6aef;
+        }
+
+        .item-title a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .item-summary {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* 로딩 및 에러 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+            color: #d32f2f;
+            background-color: #ffebee;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .header-title {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="app">
-  <header class="top">
-    <div class="brand">
-      <h1>오늘의 사설</h1>
-      <div class="brand-right">
-        <span class="date" id="today"></span>
-        <button class="sync" id="syncBtn">업데이트</button>
-      </div>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="header-left">
+                <div class="header-title">오늘의 사설<span class="by-credit">_by.HJ</span></div>
+            </div>
+            <div class="header-right">
+                <div class="date-time" id="dateTime"></div>
+                <button class="update-btn" id="updateBtn">업데이트</button>
+            </div>
+        </div>
+
+        <!-- 콘텐츠 -->
+        <div id="content" class="loading">데이터를 불러오는 중...</div>
     </div>
-  </header>
 
-  <main>
-    <div class="notice">신문사별로 <b>최신 사설 3개</b>를 가져옵니다. 요약은 본문의 첫 문장이며, 카드를 누르면 원문이 새 창으로 열립니다.</div>
-    <div id="content"><div class="empty">불러오는 중…</div></div>
-  </main>
+    <script>
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(err => {
+                console.log('Service Worker 등록 실패:', err);
+            });
+        }
 
-  <div class="footer">기사 전문은 언론사 저작권을 위해 앱에 싣지 않고 원문으로 연결합니다.</div>
-</div>
+        // 날짜/시간 표시
+        function displayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const date = String(today.getDate()).padStart(2, '0');
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const day = dayNames[today.getDay()];
 
-<script>
-// 글자 안의 특수문자를 안전하게 바꿔서 화면이 깨지지 않게 합니다
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            document.getElementById('dateTime').textContent = `${year}.${month}.${date} (${day})`;
+        }
 
-// 사설 하나를 카드 모양 HTML로 만듭니다
-function card(a, paper) {
-  return `<a class="card" href="${esc(a.url)}" target="_blank" rel="noopener">
-    <div class="meta"><i class="dot ${esc(paper.key)}"></i><b>${esc(paper.name)}</b><span>·</span><span>${esc(a.date)}</span></div>
-    <h3>${esc(a.title)}</h3>
-    <p class="summary">${esc(a.summary)}</p>
-  </a>`;
-}
+        // 사설 데이터 로드
+        async function loadEditorials() {
+            try {
+                const response = await fetch('/api/editorials');
+                if (!response.ok) throw new Error('데이터 로드 실패');
 
-// 신문사 하나의 묶음(제목 + 카드들)을 만듭니다
-function section(paper) {
-  const items = paper.items || [];
-  const info = paper.error ? '불러오기 실패' : `${items[0]?.date || '자료 없음'} · ${items.length}건`;
-  const body = items.length
-    ? items.map(a => card(a, paper)).join('')
-    : `<div class="empty">${paper.error ? '사설을 불러오지 못했습니다.<br>' + esc(paper.error) : '확인된 사설이 없습니다.'}</div>`;
-  return `<section><div class="section-title"><strong>${esc(paper.name)}</strong><span>${esc(info)}</span></div>${body}</section>`;
-}
+                const data = await response.json();
+                displayEditorials(data);
+            } catch (error) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">데이터를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</div>
+                `;
+                console.error('Error:', error);
+            }
+        }
 
-// 서버(/api/editorials)에서 사설을 받아와 화면에 그립니다
-async function load() {
-  const box = document.getElementById('content');
-  try {
-    const r = await fetch('/api/editorials?ts=' + Date.now(), { cache: 'no-store' });
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error || '서버 오류');
-    box.innerHTML = (j.papers || []).map(section).join('');
-  } catch (e) {
-    box.innerHTML = `<div class="empty">사설을 불러오지 못했습니다.<br>${esc(e.message)}</div>`;
-  }
-}
+        // 사설 표시
+        function displayEditorials(editorials) {
+            const contentDiv = document.getElementById('content');
+            let html = '';
 
-document.getElementById('syncBtn').onclick = async () => {
-  const b = document.getElementById('syncBtn');
-  b.disabled = true; b.textContent = '불러오는 중';
-  await load();
-  b.disabled = false; b.textContent = '업데이트';
-};
+            const newspaperOrder = ['조선일보', '매일경제', '한겨레', '한국경제'];
 
-document.getElementById('today').textContent =
-  new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' });
+            for (const newspaper of newspaperOrder) {
+                const items = editorials[newspaper] || [];
+                if (items.length === 0) continue;
 
-load();
+                html += `
+                    <div class="newspaper-section">
+                        <div class="section-header">
+                            <div class="section-title">■ ${newspaper}</div>
+                            <div class="section-date">${new Date().toISOString().split('T')[0]} · ${items.length}건</div>
+                        </div>
+                `;
 
-// 앱 설치 기능을 켭니다
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
-</script>
+                for (const item of items) {
+                    const itemDate = new Date().toISOString().split('T')[0];
+                    html += `
+                        <div class="editorial-item">
+                            <div class="item-meta">
+                                <span class="item-category">정치</span>
+                                <span>${itemDate}</span>
+                            </div>
+                            <a href="${item.url}" target="_blank" class="item-title">${item.title}</a>
+                            <div class="item-summary">${item.summary}</div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = html;
+        }
+
+        // 초기화
+        displayDate();
+        loadEditorials();
+
+        // 업데이트 버튼
+        document.getElementById('updateBtn').addEventListener('click', () => {
+            document.getElementById('content').innerHTML = '<div class="loading">데이터를 새로고침하는 중...</div>';
+            loadEditorials();
+        });
+    </script>
 </body>
 </html>
