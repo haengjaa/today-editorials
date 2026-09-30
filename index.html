@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
+<!-- 휴대폰 홈 화면에 앱처럼 설치하기 위한 설정 -->
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="오늘의 사설">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>오늘의 사설</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--text:#121722;--muted:#697386;--line:#e5e7eb}
@@ -104,6 +112,9 @@ document.getElementById('today').textContent =
   new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' });
 
 load();
+
+// 앱 설치 기능을 켭니다
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 </script>
 </body>
 </html>
