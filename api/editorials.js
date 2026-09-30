@@ -83,7 +83,7 @@ function parseRss(xml) {
   let m;
   while ((m = re.exec(xml))) {
     const get = tag => cdata((m[1].match(new RegExp('<' + tag + '>([\\s\\S]*?)</' + tag + '>')) || [])[1]);
-    out.push({ title: decode(get('title')), link: get('link'), pubDate: get('pubDate') });
+    out.push({ title: decode(get('title')), link: get('link'), pubDate: get('pubDate'), content: get('content:encoded') });
   }
   return out;
 }
@@ -129,9 +129,37 @@ async function fetchHankyung() {
   }));
 }
 
+/* ───────── 조선일보: 오피니언 RSS에 본문 전체가 들어 있어서 RSS만 읽습니다 ───────── */
+
+// RSS 본문(HTML)에서 사진·영상 등을 빼고 글자만 남깁니다
+function chosunBody(html) {
+  const raw = /^\s*&lt;/.test(html) ? decode(html) : html; // 본문이 한 번 더 감싸져 온 경우 대비
+  return clean(
+    raw
+      .replace(/<(figure|script|style|figcaption|table)[\s\S]*?<\/\1>/gi, ' ')
+      .replace(/<img[^>]*>/gi, ' ')
+  );
+}
+
+async function fetchChosun() {
+  const xml = await getText('https://www.chosun.com/arc/outboundfeeds/rss/category/opinion/?outputType=xml');
+  return parseRss(xml)
+    .filter(x => x.link.includes('/opinion/editorial/')) // 사설만 고릅니다
+    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+    .slice(0, HOW_MANY)
+    .map(e => ({
+      id: 'chosun-' + (e.link.match(/\/([A-Z0-9]+)\/?$/) || [])[1],
+      url: e.link,
+      title: stripTag(e.title),
+      date: toKstDate(e.pubDate),
+      summary: firstSentence(chosunBody(e.content)) || '본문을 불러오지 못했습니다.',
+    }));
+}
+
 /* ───────── 신문사 목록: 새 신문사는 여기에 한 줄씩 추가합니다 ───────── */
 
 const PAPERS = [
+  { key: 'chosun', name: '조선일보', fetch: fetchChosun },
   { key: 'mk', name: '매일경제', fetch: fetchMk },
   { key: 'hankyung', name: '한국경제', fetch: fetchHankyung },
 ];
